@@ -2,7 +2,9 @@
   <div v-if="show" class="bonuses">
     <h3 class="bonuses__header">Бонусы</h3>
     <div class="bonuses__list" v-for="bonus in bonusesList" :key="bonus.id">
-      <label v-show="!bonus.mod" class="bonuses__title">{{ bonus.title }}</label>
+      <label v-show="!bonus.mod" class="bonuses__title">{{
+        bonus.title
+      }}</label>
       <input
         class="bonuses__input"
         :placeholder="bonus.data"
@@ -17,7 +19,12 @@
         <label for="no">Нет</label>
         <input id="steam" type="radio" v-model="checkData[12]" value="Пар" />
         <label for="steam">Пар</label>
-        <input id="melting" type="radio" v-model="checkData[12]" value="Таяние" />
+        <input
+          id="melting"
+          type="radio"
+          v-model="checkData[12]"
+          value="Таяние"
+        />
         <label for="melting">Таяние</label>
       </div>
       <button class="bonuses__button" @click="saveInput()">Сохранить</button>
@@ -34,7 +41,6 @@ export default {
       show: false,
       itemId: 0,
       bonuses: [],
-      radio: [],
     };
   },
   computed: {
@@ -48,6 +54,7 @@ export default {
       let check = this.bonusesGet.filter((item) => item.itemId === this.itemId);
 
       if (check.length !== 0) {
+        this.clearInputs();
         this.forItem(this.bonusesList, check[0].bonus, true);
         this.submitEvent(this.bonusesGet);
       }
@@ -55,13 +62,13 @@ export default {
       return this.bonuses;
     },
 
-    // // Очищает input, при выключении окна
-    // isShow() {
-    //   if (!this.show) {
-    //     this.clearInputs();
-    //   }
-    //   return this.show;
-    // },
+    // Очищает input, при выключении окна
+    isShow() {
+      if (!this.show) {
+        this.clearInputs();
+      }
+      return this.show;
+    },
   },
   methods: {
     ...mapActions(["updateSubmit"]),
@@ -78,13 +85,13 @@ export default {
         };
 
         this.updateSubmit(res);
-        this.submitEvent(res);
+        this.submitEvent(this.bonusesGet);
       }
     },
 
     // Отправка данных в родитель
     submitEvent(res) {
-      this.$emit("update:model-value", res);
+      this.$emit("bonus-update", res);
     },
 
     // "Универсальный" перебор данных
@@ -101,15 +108,12 @@ export default {
               this.bonuses.splice(item.id, 1, v.value);
             }
           } else if (k === item.id && v !== "") {
-            // Заменяет пар, на таяние
-            if (v == "Таяние")
-              item = arr1[k+1]
             item.value = v;
             return res.push(item);
           }
         });
       });
-    
+
       return res;
     },
 
@@ -134,6 +138,7 @@ export default {
   height: 100%;
   background: $bg_base;
   padding: $pd_base $pd_vbig;
+  position: relative;
 
   &__header {
     font-size: $heder_3;

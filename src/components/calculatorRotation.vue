@@ -20,10 +20,19 @@
             src="@/assets/svg/Gear.svg"
             @click="showBonus($event, item.id)"
           />
+          <div class="calculator__bonuses">
+            <p
+              :class="bonus.style"
+              v-for="bonus in item.bonuses"
+              :key="bonus.title"
+            >
+              {{ bonus.short }} {{ bonus.value }}
+            </p>
+          </div>
         </div>
         <img src="@/assets/svg/Plus.svg" @click="addRotation" />
       </div>
-      <bonuses-form ref="bonus" @update:model-value="bonusesOpt" />
+      <bonuses-form ref="bonus" v-on:bonus-update="bonusUpdate($event)" />
     </div>
   </div>
 </template>
@@ -54,27 +63,41 @@ export default {
   methods: {
     ...mapMutations(["addRotation"]),
     ...mapMutations(["delRotation"]),
+
     // Слушает событие `select` rotation(N1,N1a)
     updateListRotation(event) {
       this.rotationList[event.listId].rotation = event.optId;
     },
+
     // Показывает окно bonusesForm
     // Привязывает окно к itemId => rotationList.id
     showBonus(e, id) {
       // Исправляет все баги, когда input, "запоминает", другие данные
-      this.$refs.bonus.bonuses = []
+      this.$refs.bonus.bonuses = [];
       this.$refs.bonus.show = !this.$refs.bonus.show;
       this.$refs.bonus.itemId = id;
       this.btnActive(e, this.$refs.bonus.show);
     },
+
     // Изменяет иконку Шестеренки
     btnActive(e, bool) {
       let btn;
 
       if (bool) btn = this.btnGear[1];
       else btn = this.btnGear[0];
-      
+
       e.target.attributes[0].value = require(`@/assets/svg/${btn}`);
+    },
+
+    // Обновляет данные о бонусах
+    bonusUpdate(e) {
+      this.rotationList.map((item) => {
+        e.map((res) => {
+          if (item.id === res.itemId) {
+            this.rotationList[item.id].bonuses = res.bonus;
+          }
+        });
+      });
     },
   },
 };
@@ -113,6 +136,28 @@ export default {
     justify-content: space-evenly;
     width: 100%;
     margin: $mg_vbig;
+  }
+
+  &__bonuses {
+    display: flex;
+    position: absolute;
+    left: 485px;
+    z-index: 0;
+
+    & p {
+      padding: $pd_small;
+      color: $color_dark;
+      margin-left: $mg_base;
+    }
+    & .green {
+      background: $bg_green;
+    }
+    & .white {
+      background: $bg_white;
+    }
+    & .percent::after {
+      content: "%";
+    }
   }
 }
 </style>
